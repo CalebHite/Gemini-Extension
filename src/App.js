@@ -1,24 +1,23 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+/*global chrome*/
+
+
+import React, { useEffect, useState } from "react";
 
 function App() {
+  const [selectedText, setSelectedText] = useState("");
+
+  useEffect(() => {
+    chrome.storage.local.get("selectedText", (result) => {
+      if (result.selectedText) {
+        setSelectedText(result.selectedText);
+      }
+    });
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ padding: "20px", textAlign: "center" }}>
+      <h1>Selected Text</h1>
+      <p>{selectedText || "No text selected yet"}</p>
     </div>
   );
 }
