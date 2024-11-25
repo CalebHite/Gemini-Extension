@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "React Chrome Extension",
+  "name": "Gemini Helper",
   "version": "3.0",
-  "description": "A barebones React Chrome extension.",
+  "description": "A Gemini Powered Query Extension",
   "action": {
     "default_popup": "index.html",
     "default_icon": {
