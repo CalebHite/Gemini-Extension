@@ -9,10 +9,10 @@ function App() {
   const [queryResponse, setResponse] = useState("");
   
   // do NOT leave api key when pushing to github
-  const genAI = new GoogleGenerativeAI("REPLACE WITH API KEY");
+  const genAI = new GoogleGenerativeAI("AIzaSyChASsVBWmAfZjm3AscwnEmFqrlFWv87NY");
   const model = genAI.getGenerativeModel({ 
     model: "gemini-1.5-flash", 
-    systemInstruction: "Answer the question in 200 words or less."
+    systemInstruction: "Answer the question in 150 words or less."
   });
 
   const makeQuery = async () => {
@@ -51,9 +51,13 @@ function App() {
         }}
         value="Search!"
       />
-      <p>Selected Text: {selectedText || "No text selected yet"}</p>
       
-      <p>{queryResponse}</p>
+      <div>
+        {queryResponse === ""
+          ? <p>Selected Text: {selectedText || "No text selected yet"}</p>
+          : <p>{queryResponse}</p>
+        }
+      </div>
     </div>
   );
 }
