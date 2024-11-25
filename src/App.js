@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 
 function App() {
   const [selectedText, setSelectedText] = useState("");
+  const [enteredPrompt, setPrompt] = useState("");
 
   useEffect(() => {
     chrome.storage.local.get("selectedText", (result) => {
@@ -16,8 +17,11 @@ function App() {
 
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
-      <h1>Selected Text</h1>
-      <p>{selectedText || "No text selected yet"}</p>
+      <input type="text" value={enteredPrompt} onChange={e=>setPrompt(e.target.value)} placeholder="Enter Prompt: "></input>
+      <input type="button" onClick={()=>{
+        alert(enteredPrompt);
+      }}>test</input>
+      <p>Selected Text: {selectedText || "No text selected yet"}</p>
     </div>
   );
 }
