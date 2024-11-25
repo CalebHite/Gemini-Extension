@@ -17,10 +17,19 @@ function App() {
 
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
-      <input type="text" value={enteredPrompt} onChange={e=>setPrompt(e.target.value)} placeholder="Enter Prompt: "></input>
-      <input type="button" onClick={()=>{
-        alert(enteredPrompt);
-      }}>test</input>
+      <input
+        type="text"
+        value={enteredPrompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        placeholder="Enter Prompt: "
+      />
+      <input
+        type="button"
+        onClick={() => {
+          alert(enteredPrompt);
+        }}
+        value="Test"
+      />
       <p>Selected Text: {selectedText || "No text selected yet"}</p>
     </div>
   );
