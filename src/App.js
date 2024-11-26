@@ -7,22 +7,22 @@ function App() {
   const [selectedText, setSelectedText] = useState("");
   const [enteredPrompt, setPrompt] = useState("");
   const [queryResponse, setResponse] = useState("");
-  
+
   // do NOT leave api key when pushing to github
   const genAI = new GoogleGenerativeAI("AIzaSyChASsVBWmAfZjm3AscwnEmFqrlFWv87NY");
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash", 
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
     systemInstruction: "Answer the question in 150 words or less."
   });
 
   const makeQuery = async () => {
-    try{
+    try {
       const prompt = enteredPrompt + ": " + selectedText;
 
       const result = await model.generateContent(prompt);
       setResponse(result.response.text());
 
-    } catch(err){
+    } catch (err) {
       console.log(err);
     }
   }
@@ -43,6 +43,9 @@ function App() {
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Enter Prompt: "
       />
+      <div>
+        <p>{"Selected Text: " + selectedText || "No text selected yet"}</p>
+      </div>
       <input
         class="button"
         type="button"
@@ -51,12 +54,11 @@ function App() {
         }}
         value="Search!"
       />
-      
+
       <div>
-        {queryResponse === ""
-          ? <p>Selected Text: {selectedText || "No text selected yet"}</p>
-          : <p>{queryResponse}</p>
-        }
+        <p>
+          {"\n" + queryResponse}
+        </p>
       </div>
     </div>
   );
