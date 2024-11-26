@@ -1,13 +1,13 @@
 body {
-  margin: 2px;
-  font-family: 'Courier New', Courier, monospace;
+  margin: 1rem;
+  font-family: 'Montserrat', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: clamp(15rem, 20rem, 20rem);
 }
 
 input{
   margin-bottom: 5px;
-  font-family: 'Courier New', Courier, monospace;
 }
 
 .button {
@@ -19,7 +19,7 @@ input{
 	display:inline-block;
 	cursor:pointer;
 	color:#ffffff;
-	font-family:Courier New;
+	font: inherit;
 	font-size:15px;
 	padding:9px 23px;
 	text-decoration:none;
