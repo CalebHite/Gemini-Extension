@@ -6,7 +6,7 @@ container.style.position = "fixed";
 container.style.top = "2rem";
 container.style.left = "2rem";
 container.style.width = "25rem";
-container.style.height = "15rem";
+container.style.height = "12rem";
 container.style.backgroundColor = "rgba(50, 50, 50, 0.9)";
 container.style.color = "white";
 container.style.padding = "0 1rem 1rem";
@@ -24,10 +24,9 @@ const header = document.createElement("div");
 header.style.width = "100%";
 header.style.height = "2rem";
 header.style.display = "flex";
-header.style.justifyContent = "flex-end";
+header.style.justifyContent = "flex-start";
 header.style.alignItems = "center";
-header.style.cursor = "default";
-header.style.color = "white";
+header.style.cursor = "grab";
 
 // Minimize button
 const minimizeButton = document.createElement("p");
@@ -36,19 +35,18 @@ minimizeButton.style.background = "none";
 minimizeButton.style.border = "none";
 minimizeButton.style.fontSize = "1.5rem";
 minimizeButton.style.cursor = "pointer";
-minimizeButton.style.marginRight = "0.5rem";
+minimizeButton.style.marginLeft = "0.5rem";
 
 // Maximize button
 const maximizeButton = document.createElement("p");
 maximizeButton.textContent = "+";
+maximizeButton.style.margin = "0";
+maximizeButton.style.height = "100%";
 maximizeButton.style.background = "none";
 maximizeButton.style.border = "none";
 maximizeButton.style.fontSize = "1.5rem";
-maximizeButton.style.cursor = "pointer";
+maximizeButton.style.cursor = "grab";
 maximizeButton.style.display = "none"; // Hidden by default
-maximizeButton.style.position = "absolute";
-maximizeButton.style.top = "-0.8rem";
-maximizeButton.style.left = "0.6rem";
 
 // Inner elements container
 const innerContainer = document.createElement("div");
@@ -119,63 +117,96 @@ container.appendChild(maximizeButton);
 // Add the container to the body
 document.body.appendChild(container);
 
-// Toggle minimize and maximize functionality
+// Add minimize/maximize/drag functionality to the container
 let isMinimized = false;
-minimizeButton.addEventListener("click", () => {
-  isMinimized = true;
-  container.style.height = "2rem"; // Shrink to only show the header
-  container.style.width = "2rem"; // Small square size
-  container.style.padding = "0"; // Remove padding
-  container.style.resize = "none"; // Disable resizing
-  innerContainer.style.display = "none"; // Hide inner elements
-  minimizeButton.style.display = "none"; // Hide minimize button
-  maximizeButton.style.display = "block"; // Show maximize button
-});
-
-maximizeButton.addEventListener("click", () => {
-  isMinimized = false;
-  container.style.height = "15rem"; // Restore full height
-  container.style.width = "25rem"; // Restore full width
-  container.style.padding = "1rem"; // Restore padding
-  container.style.resize = "both"; // Enable resizing
-  innerContainer.style.display = "flex"; // Show inner elements
-  minimizeButton.style.display = "block"; // Show minimize button
-  maximizeButton.style.display = "none"; // Hide maximize button
-});
-
-// Add drag functionality to the container
 let isDragging = false;
-let offsetX, offsetY;
+let startX, startY, offsetX, offsetY;
 
 // Start dragging
 container.addEventListener("mousedown", (e) => {
-  if (e.target === maximizeButton || e.target === minimizeButton) return;
   if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") return;
 
   isDragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
   offsetX = e.clientX - container.offsetLeft;
   offsetY = e.clientY - container.offsetTop;
   container.style.cursor = "grabbing";
+
+  // Disable text selection when dragging
+  document.body.style.userSelect = "none"; 
 });
 
 // Drag the container
 document.addEventListener("mousemove", (e) => {
   if (!isDragging) return;
-  container.style.left = `${(e.clientX - offsetX) / 16}rem`;
-  container.style.top = `${(e.clientY - offsetY) / 16}rem`;
+  container.style.left = `${(e.clientX - offsetX)}px`;
+  container.style.top = `${(e.clientY - offsetY)}px`;
 });
 
 // Stop dragging
 document.addEventListener("mouseup", () => {
   isDragging = false;
   container.style.cursor = "grab";
+  
+  // Re-enable text selection once dragging stops
+  document.body.style.userSelect = "auto"; 
 });
 
-// document.addEventListener("mouseup", () => {
-//     const selectedText = window.getSelection().toString().trim();
+// Toggle minimize and maximize functionality
+minimizeButton.addEventListener("click", (e) => {
+  let endX = e.clientX;
+  let endY = e.clientY;
+  let diffX = endX - startX;
+  let diffY = endY - startY;
+  if (diffX != 0 && diffY != 0) return;
+
+  if (isDragging) return;
+  isMinimized = true;
+  container.style.height = "2rem"; // Shrink to only show the header
+  container.style.width = "2rem"; // Small square size
+  container.style.padding = "0"; // Remove padding
+  container.style.resize = "none"; // Disable resizing
+  innerContainer.style.display = "none"; // Hide inner elements
+  header.style.display = "none"; // Hide minimize button
+  maximizeButton.style.display = "flex"; // Show maximize button
+  maximizeButton.style.display = "flex"; // Show maximize button
+  maximizeButton.style.alignItems = "center"; // Center button
+  maximizeButton.style.justifyContent = "center"; // Center button
   
-//     if (selectedText) {
-//       chrome.runtime.sendMessage({ type: "TEXT_SELECTED", text: selectedText });
-//     }
-//   });
+  // Position container at the top-right corner
+  container.style.left = "2rem"; // Align to the left
+  container.style.top = "2rem";   // Adjust top position if needed
+  container.style.transition = "none";
+});
+
+maximizeButton.addEventListener("click", (e) => {
+  let endX = e.clientX;
+  let endY = e.clientY;
+  let diffX = endX - startX;
+  let diffY = endY - startY;
+
+  if (diffX != 0 && diffY != 0) return;
+  if (isDragging) return;
+
+  isMinimized = false;
+  container.style.width = "25rem"; // Restore full width
+  container.style.height = "12rem"; // Restore full height
+  container.style.padding = "0 1rem 1rem"; // Restore padding
+  container.style.resize = "both"; // Enable resizing
+  innerContainer.style.display = "flex"; // Show inner elements
+  header.style.display = "flex"; // Show minimize button
+  maximizeButton.style.display = "none"; // Hide maximize button
+  
+  // Use transform-origin for expanding from the top-right corner
+  container.style.transition = "width 0.3s ease, height 0.3s ease";
+});
+
+document.addEventListener("mouseup", () => {
+  const selectedText = window.getSelection().toString().trim();
+  
+  if (selectedText) {
+    chrome.runtime.sendMessage({ type: "TEXT_SELECTED", text: selectedText });
+  }
+  });
   
