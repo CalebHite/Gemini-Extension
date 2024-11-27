@@ -139,9 +139,9 @@ container.addEventListener("mousedown", (e) => {
     offsetY = e.clientY - container.offsetTop;
     container.style.cursor = "grabbing";
   }
-  
+
   // Disable text selection in either case
-  document.body.style.userSelect = "none"; 
+  document.body.style.userSelect = "none";
 });
 
 // Drag/resize the container
@@ -161,9 +161,9 @@ document.addEventListener("mouseup", () => {
   isDragging = false;
   isResizing = false;
   container.style.cursor = "grab";
-  
+
   // Re-enable text selection once dragging stops
-  document.body.style.userSelect = "auto"; 
+  document.body.style.userSelect = "auto";
 });
 
 // Toggle minimize and maximize functionality
@@ -186,7 +186,7 @@ minimizeButton.addEventListener("click", (e) => {
   maximizeButton.style.display = "flex"; // Show maximize button
   maximizeButton.style.alignItems = "center"; // Center button
   maximizeButton.style.justifyContent = "center"; // Center button
-  
+
   // Position container at the top-right corner
   container.style.left = "2rem"; // Align to the left
   container.style.top = "2rem";   // Adjust top position if needed
@@ -210,36 +210,64 @@ maximizeButton.addEventListener("click", (e) => {
   innerContainer.style.display = "flex"; // Show inner elements
   header.style.display = "flex"; // Show minimize button
   maximizeButton.style.display = "none"; // Hide maximize button
-  
+
   // Use transform-origin for expanding from the top-right corner
   container.style.transition = "width 0.3s ease, height 0.3s ease";
 });
 
-promptInput.addEventListener("mouseover", () => {
-  // Disable text selecting and highlight previously selected text
-  document.body.style.userSelect = "none"; 
-});
+let savedSelection = null;
+let savedSelectionText = null;
 
-document.addEventListener("mouseout", () => {
-  // Re-enable text selecting
-  document.body.style.userSelect = "auto"; 
-});
+// Save the current selection
+function saveSelection() {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    savedSelection = selection.getRangeAt(0);
+    savedSelectionText = selection.toString();
+  }
+}
 
-document.addEventListener("mouseup", () => {
-  const selectedText = window.getSelection().toString().trim();
-  
-  if (selectedText) {
-    // chrome.runtime.sendMessage({ type: "TEXT_SELECTED", text: selectedText });
-    if (selectedText.length > 200) { // Shorten dislayed text if too long
-      selectedTextDisplay.textContent = `${selectedText.slice(0,80)}\n...\n${selectedText.slice(selectedText.length-80,selectedText.length)}`;
+// Restore the saved selection
+function restoreSelection() {
+  savedSelection.deleteContents;
+  if (savedSelection) {
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(savedSelection);
+  }
+}
+
+// Display selection in the GUI
+document.addEventListener("click", () => {
+  tempSelectedText = window.getSelection().toString().trim();
+
+  if (tempSelectedText) {
+    if (tempSelectedText.length > 200) { // Shorten dislayed text if too long
+      selectedTextDisplay.textContent = `${tempSelectedText.slice(0, 80)}\n...\n${tempSelectedText.slice(tempSelectedText.length - 80, tempSelectedText.length)}`;
     } else {
-      selectedTextDisplay.textContent = selectedText;
+      selectedTextDisplay.textContent = tempSelectedText;
+    };
+  } else if (savedSelectionText) {
+    if (savedSelectionText.length > 200) { // Shorten dislayed text if too long
+      selectedTextDisplay.textContent = `${savedSelectionText.slice(0, 80)}\n...\n${savedSelectionText.slice(savedSelectionText.length - 80, savedSelectionText.length)}`;
+    } else {
+      selectedTextDisplay.textContent = savedSelectionText;
     };
   } else {
     selectedTextDisplay.textContent = "Selected text will appear here.";
   }
 });
-  
+
+// Prevent text deselection when clicking on the input field
+promptInput.addEventListener("mousedown", (e) => {
+  saveSelection();
+});
+
+// Restore the selection after focusing on the input field
+promptInput.addEventListener("blur", (e) => {
+  restoreSelection();
+});
+
 // searchButton.addEventListener("click", () => {
 //   if (selectedText) {
 //     selectedTextDisplay.textContent = selectedText;
@@ -247,4 +275,3 @@ document.addEventListener("mouseup", () => {
 //     selectedTextDisplay.textContent = "Selected text will appear here.";
 //   }
 // });
-  
