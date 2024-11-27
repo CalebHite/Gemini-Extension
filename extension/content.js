@@ -183,7 +183,6 @@ minimizeButton.addEventListener("click", (e) => {
   innerContainer.style.display = "none"; // Hide inner elements
   header.style.display = "none"; // Hide minimize button
   maximizeButton.style.display = "flex"; // Show maximize button
-  maximizeButton.style.display = "flex"; // Show maximize button
   maximizeButton.style.alignItems = "center"; // Center button
   maximizeButton.style.justifyContent = "center"; // Center button
 
@@ -203,15 +202,14 @@ maximizeButton.addEventListener("click", (e) => {
   if (isDragging) return;
 
   isMinimized = false;
-  container.style.width = "25rem"; // Restore full width
-  container.style.height = "12rem"; // Restore full height
   container.style.padding = "0 1rem 1rem"; // Restore padding
   container.style.resize = "both"; // Enable resizing
   innerContainer.style.display = "flex"; // Show inner elements
   header.style.display = "flex"; // Show minimize button
   maximizeButton.style.display = "none"; // Hide maximize button
+  container.style.width = "25rem"; // Restore full height
+  autoResize(); // Restore full height
 
-  // Use transform-origin for expanding from the top-right corner
   container.style.transition = "width 0.3s ease, height 0.3s ease";
 });
 
@@ -237,36 +235,47 @@ function restoreSelection() {
   }
 }
 
-// Display selection in the GUI
-document.addEventListener("click", () => {
-  tempSelectedText = window.getSelection().toString().trim();
+// Display selection
+document.addEventListener("click", (e) => {
+  if (e.target === promptInput || e.target === searchButton) return;
+  saveSelection();
 
-  if (tempSelectedText) {
-    if (tempSelectedText.length > 200) { // Shorten dislayed text if too long
-      selectedTextDisplay.textContent = `${tempSelectedText.slice(0, 80)}\n...\n${tempSelectedText.slice(tempSelectedText.length - 80, tempSelectedText.length)}`;
-    } else {
-      selectedTextDisplay.textContent = tempSelectedText;
-    };
-  } else if (savedSelectionText) {
+  if (savedSelectionText) {
     if (savedSelectionText.length > 200) { // Shorten dislayed text if too long
       selectedTextDisplay.textContent = `${savedSelectionText.slice(0, 80)}\n...\n${savedSelectionText.slice(savedSelectionText.length - 80, savedSelectionText.length)}`;
     } else {
       selectedTextDisplay.textContent = savedSelectionText;
-    };
+    }
   } else {
     selectedTextDisplay.textContent = "Selected text will appear here.";
   }
+
+  autoResize();
 });
 
-// Prevent text deselection when clicking on the input field
-promptInput.addEventListener("mousedown", (e) => {
-  saveSelection();
-});
-
-// Restore the selection after focusing on the input field
-promptInput.addEventListener("blur", (e) => {
+// Display result
+searchButton.addEventListener("click", () => {
+  if (promptInput || savedSelectionText) {
+    responseOutput.innerHTML = `${promptInput.value}<br><br>${savedSelectionText}`;
+  } else {
+    responseOutput.innerHTML = "Response will appear here."
+  }
+  autoResize();
   restoreSelection();
 });
+
+function autoResize() {
+  if (isMinimized) return;
+
+  const selectedTextDisplayHeight = selectedTextDisplay.getBoundingClientRect().height;
+  const responseOutputHeight = responseOutput.getBoundingClientRect().height;
+  const resizeHeight = Math.round(selectedTextDisplayHeight + responseOutputHeight) + 160;
+
+  console.log(selectedTextDisplayHeight);
+  console.log(responseOutputHeight);
+  console.log(resizeHeight);
+  container.style.height = `${resizeHeight}px`;
+}
 
 // searchButton.addEventListener("click", () => {
 //   if (selectedText) {
