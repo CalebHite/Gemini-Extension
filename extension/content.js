@@ -120,33 +120,46 @@ document.body.appendChild(container);
 // Add minimize/maximize/drag functionality to the container
 let isMinimized = false;
 let isDragging = false;
+let isResizing = false;
 let startX, startY, offsetX, offsetY;
 
-// Start dragging
+// Start dragging/resizing
 container.addEventListener("mousedown", (e) => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") return;
 
-  isDragging = true;
-  startX = e.clientX;
-  startY = e.clientY;
-  offsetX = e.clientX - container.offsetLeft;
-  offsetY = e.clientY - container.offsetTop;
-  container.style.cursor = "grabbing";
-
-  // Disable text selection when dragging
+  if (e.offsetX > container.offsetWidth - 10 && e.offsetY > container.offsetHeight - 10) {
+    isResizing = true;
+    container.style.cursor = "se-resize"; // Change cursor to resizing cursor
+  }
+  else {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    offsetX = e.clientX - container.offsetLeft;
+    offsetY = e.clientY - container.offsetTop;
+    container.style.cursor = "grabbing";
+  }
+  
+  // Disable text selection in either case
   document.body.style.userSelect = "none"; 
 });
 
-// Drag the container
+// Drag/resize the container
 document.addEventListener("mousemove", (e) => {
-  if (!isDragging) return;
-  container.style.left = `${(e.clientX - offsetX)}px`;
-  container.style.top = `${(e.clientY - offsetY)}px`;
+  if (isDragging) {
+    container.style.left = `${(e.clientX - offsetX)}px`;
+    container.style.top = `${(e.clientY - offsetY)}px`;
+  }
+  else if (isResizing) {
+    container.style.width = `${(e.clientX - container.offsetLeft)}px`;
+    container.style.height = `${(e.clientY - container.offsetTop)}px`;
+  }
 });
 
-// Stop dragging
+// Stop dragging/Resizing
 document.addEventListener("mouseup", () => {
   isDragging = false;
+  isResizing = false;
   container.style.cursor = "grab";
   
   // Re-enable text selection once dragging stops
@@ -202,11 +215,36 @@ maximizeButton.addEventListener("click", (e) => {
   container.style.transition = "width 0.3s ease, height 0.3s ease";
 });
 
+promptInput.addEventListener("mouseover", () => {
+  // Disable text selecting and highlight previously selected text
+  document.body.style.userSelect = "none"; 
+});
+
+document.addEventListener("mouseout", () => {
+  // Re-enable text selecting
+  document.body.style.userSelect = "auto"; 
+});
+
 document.addEventListener("mouseup", () => {
   const selectedText = window.getSelection().toString().trim();
   
   if (selectedText) {
-    chrome.runtime.sendMessage({ type: "TEXT_SELECTED", text: selectedText });
+    // chrome.runtime.sendMessage({ type: "TEXT_SELECTED", text: selectedText });
+    if (selectedText.length > 200) { // Shorten dislayed text if too long
+      selectedTextDisplay.textContent = `${selectedText.slice(0,80)}\n...\n${selectedText.slice(selectedText.length-80,selectedText.length)}`;
+    } else {
+      selectedTextDisplay.textContent = selectedText;
+    };
+  } else {
+    selectedTextDisplay.textContent = "Selected text will appear here.";
   }
-  });
+});
+  
+// searchButton.addEventListener("click", () => {
+//   if (selectedText) {
+//     selectedTextDisplay.textContent = selectedText;
+//   } else {
+//     selectedTextDisplay.textContent = "Selected text will appear here.";
+//   }
+// });
   
