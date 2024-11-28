@@ -213,8 +213,8 @@ maximizeButton.addEventListener("click", (e) => {
   container.style.transition = "width 0.3s ease, height 0.3s ease";
 });
 
-let savedSelection = null;
-let savedSelectionText = null;
+let savedSelection = "";
+let savedSelectionText = "";
 
 // Save the current selection
 function saveSelection() {
@@ -255,11 +255,12 @@ document.addEventListener("click", (e) => {
 
 // Display result
 searchButton.addEventListener("click", () => {
-  if (promptInput || savedSelectionText) {
-    responseOutput.innerHTML = `${promptInput.value}<br><br>${savedSelectionText}`;
-  } else {
-    responseOutput.innerHTML = "Response will appear here."
-  }
+  const prompt = promptInput.value + ": " + savedSelectionText;
+  console.log(prompt);
+  chrome.runtime.sendMessage({ action: "sendPrompt", prompt: "This is my prompt" }, (response) => {
+    console.log("Response from background:", response);
+  });
+  
   autoResize();
   restoreSelection();
 });
@@ -271,16 +272,5 @@ function autoResize() {
   const responseOutputHeight = responseOutput.getBoundingClientRect().height;
   const resizeHeight = Math.round(selectedTextDisplayHeight + responseOutputHeight) + 160;
 
-  console.log(selectedTextDisplayHeight);
-  console.log(responseOutputHeight);
-  console.log(resizeHeight);
   container.style.height = `${resizeHeight}px`;
 }
-
-// searchButton.addEventListener("click", () => {
-//   if (selectedText) {
-//     selectedTextDisplay.textContent = selectedText;
-//   } else {
-//     selectedTextDisplay.textContent = "Selected text will appear here.";
-//   }
-// });
